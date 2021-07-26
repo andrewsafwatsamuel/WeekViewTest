@@ -23,6 +23,8 @@ class MainActivity : AppCompatActivity(), WeekView.EventClickListener,
 
     private val events: MutableList<WeekViewEvent> = arrayListOf()
 
+    private val mWeekView by lazy { findViewById<WeekView>(R.id.weekView) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -31,7 +33,7 @@ class MainActivity : AppCompatActivity(), WeekView.EventClickListener,
         setupDateTimeInterpreter()
     }
 
-    private fun initWeekView() = with(binding.weekView) {
+    private fun initWeekView() = with(mWeekView) {
         goToToday()
         numberOfVisibleDays = 1
 
