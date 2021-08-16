@@ -54,6 +54,10 @@ class MainActivity : AppCompatActivity(), WeekView.EventClickListener,
 
     private fun setupDateTimeInterpreter(/*shortDate: Boolean*/) {
         binding.weekView.dateTimeInterpreter = object : DateTimeInterpreter {
+            override fun interpretday(date: Calendar?): String {
+                return "TODO()"
+            }
+
             override fun interpretDate(date: Calendar): String? {
                 val weekdayNameFormat = SimpleDateFormat("EEE", Locale.getDefault())
                 var weekday = weekdayNameFormat.format(date.time)
@@ -78,9 +82,18 @@ class MainActivity : AppCompatActivity(), WeekView.EventClickListener,
 
     override fun onMonthChange(newYear: Int, newMonth: Int): MutableList<out WeekViewEvent> = events
 
+    private var id = 0L
     override fun onEmptyViewClicked(time: Calendar) {
         Toast.makeText(this, "Empty view pressed: " + getEventTitle(time), Toast.LENGTH_SHORT)
             .show()
+
+        var endTime = time.clone() as Calendar
+        endTime.add(Calendar.HOUR, 1)
+        //endTime[Calendar.MONTH] = newMonth - 1
+        var event = WeekViewEvent(id++,getEventTitle(time), time, endTime,"")
+        event.color = resources.getColor(R.color.event_color_01)
+        events.add(event)
+mWeekView.notifyDatasetChanged()
     }
 
     override fun onEventLongPress(event: WeekViewEvent?, eventRect: RectF?) {

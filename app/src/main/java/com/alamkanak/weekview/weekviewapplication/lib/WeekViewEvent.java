@@ -1,27 +1,84 @@
 package com.alamkanak.weekview.weekviewapplication.lib;
 
+import static com.alamkanak.weekview.weekviewapplication.lib.WeekViewUtil.isSameDay;
+
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import static com.alamkanak.weekview.weekviewapplication.lib.WeekViewUtil.*;
-
 /**
  * Created by Raquib-ul-Alam Kanak on 7/21/2014.
  * Website: http://april-shower.com
+ * and modify some code by jignesh khunt for https://github.com/jignesh13/googlecalendar
  */
 public class WeekViewEvent {
     private long mId;
-    private Calendar mStartTime;
-    private Calendar mEndTime;
+    private Calendar mStartTime,actualstart;
+    private Calendar mEndTime,actualend;
     private String mName;
     private String mLocation;
+    private String accountname;
     private int mColor;
     private boolean mAllDay;
+    private int  daytype;
+    private boolean ismoreday;
+    private long noofday;
+
+    public void setAccountname(String accountname) {
+        this.accountname = accountname;
+    }
+
+    public void setActualend(Calendar actualend) {
+        this.actualend = actualend;
+    }
+
+    public void setActualstart(Calendar actualstart) {
+        this.actualstart = actualstart;
+    }
+
+    public Calendar getActualend() {
+        return actualend;
+    }
+
+    public Calendar getActualstart() {
+        return actualstart;
+    }
+
+    public String getAccountname() {
+        return accountname;
+    }
+
+    public void setNoofday(long noofday) {
+        this.noofday = noofday;
+    }
+
+    public long getNoofday() {
+        return noofday;
+    }
+
+    public boolean isIsmoreday() {
+        return ismoreday;
+    }
+
+    public void setDaytype(int daytype) {
+        this.daytype = daytype;
+    }
+
+    public int getDaytype() {
+        return daytype;
+    }
+
+    public void setIsmoreday(boolean ismoreday) {
+        this.ismoreday = ismoreday;
+    }
 
     public WeekViewEvent(){
 
     }
+
+
 
     /**
      * Initializes the event for week view.
@@ -67,13 +124,14 @@ public class WeekViewEvent {
      * @param endTime The time when the event ends.
      * @param allDay Is the event an all day event.
      */
-    public WeekViewEvent(long id, String name, String location, Calendar startTime, Calendar endTime, boolean allDay) {
+    public WeekViewEvent(long id, String name, String location, Calendar startTime, Calendar endTime, boolean allDay,String accountname) {
         this.mId = id;
         this.mName = name;
         this.mLocation = location;
         this.mStartTime = startTime;
         this.mEndTime = endTime;
         this.mAllDay = allDay;
+        this.accountname=accountname;
     }
 
     /**
@@ -84,8 +142,8 @@ public class WeekViewEvent {
      * @param startTime The time when the event starts.
      * @param endTime The time when the event ends.
      */
-    public WeekViewEvent(long id, String name, String location, Calendar startTime, Calendar endTime) {
-        this(id, name, location, startTime, endTime, false);
+    public WeekViewEvent(long id, String name, String location, Calendar startTime, Calendar endTime,String accountname) {
+        this(id, name, location, startTime, endTime, false,accountname);
     }
 
     /**
@@ -95,8 +153,8 @@ public class WeekViewEvent {
      * @param startTime The time when the event starts.
      * @param endTime The time when the event ends.
      */
-    public WeekViewEvent(long id, String name, Calendar startTime, Calendar endTime) {
-        this(id, name, null, startTime, endTime);
+    public WeekViewEvent(long id, String name, Calendar startTime, Calendar endTime,String accountname) {
+        this(id, name, null, startTime, endTime,accountname);
     }
 
 
@@ -179,10 +237,17 @@ public class WeekViewEvent {
         Calendar endTime = (Calendar) this.getEndTime().clone();
         endTime.add(Calendar.MILLISECOND, -1);
         if (!isSameDay(this.getStartTime(), endTime)) {
+            long remainingDays = Math.round((float) (endTime.getTimeInMillis() - getStartTime().getTimeInMillis()) / (24 * 60 * 60 * 1000));
             endTime = (Calendar) this.getStartTime().clone();
             endTime.set(Calendar.HOUR_OF_DAY, 23);
             endTime.set(Calendar.MINUTE, 59);
-            WeekViewEvent event1 = new WeekViewEvent(this.getId(), this.getName(), this.getLocation(), this.getStartTime(), endTime, this.isAllDay());
+            int k=1;
+            WeekViewEvent event1 = new WeekViewEvent(this.getId(), this.getName(), this.getLocation(), this.getStartTime(), endTime, this.isAllDay(),this.accountname);
+            event1.setIsmoreday(true);
+            event1.setDaytype(k);
+            event1.setActualstart(this.getStartTime());
+            event1.setActualend(this.getEndTime());
+            event1.setNoofday(remainingDays);
             event1.setColor(this.getColor());
             events.add(event1);
 
@@ -196,21 +261,33 @@ public class WeekViewEvent {
                 Calendar endOfOverDay = (Calendar) overDay.clone();
                 endOfOverDay.set(Calendar.HOUR_OF_DAY, 23);
                 endOfOverDay.set(Calendar.MINUTE, 59);
-                WeekViewEvent eventMore = new WeekViewEvent(this.getId(), this.getName(), null, overDay, endOfOverDay, this.isAllDay());
+
+                WeekViewEvent eventMore = new WeekViewEvent(this.getId(), this.getName(), null, overDay, endOfOverDay, this.isAllDay(),this.accountname);
                 eventMore.setColor(this.getColor());
+                eventMore.setIsmoreday(true);
+                eventMore.setActualstart(this.getStartTime());
+                eventMore.setActualend(this.getEndTime());
+                k++;
+                eventMore.setDaytype(k);
+                eventMore.setNoofday(remainingDays);
                 events.add(eventMore);
 
                 // Add next day.
                 otherDay.add(Calendar.DATE, 1);
             }
-
+//
             // Add last day.
-            Calendar startTime = (Calendar) this.getEndTime().clone();
-            startTime.set(Calendar.HOUR_OF_DAY, 0);
-            startTime.set(Calendar.MINUTE, 0);
-            WeekViewEvent event2 = new WeekViewEvent(this.getId(), this.getName(), this.getLocation(), startTime, this.getEndTime(), this.isAllDay());
-            event2.setColor(this.getColor());
-            events.add(event2);
+//            Calendar startTime = (Calendar) this.getEndTime().clone();
+//            startTime.set(Calendar.HOUR_OF_DAY, 0);
+//            startTime.set(Calendar.MINUTE, 0);
+//
+//            WeekViewEvent event2 = new WeekViewEvent(this.getId(), this.getName(), this.getLocation(), startTime, this.getEndTime(), this.isAllDay());
+//            event2.setColor(this.getColor());
+//            event2.setIsmoreday(true);
+//            event2.setNoofday(remainingDays);
+//            k++;
+//            event2.setDaytype(k);
+//            events.add(event2);
         }
         else{
             events.add(this);

@@ -4,6 +4,7 @@ import java.util.Calendar;
 
 /**
  * Created by jesse on 6/02/2016.
+ * and modify some code by jignesh khunt for https://github.com/jignesh13/googlecalendar
  */
 public class WeekViewUtil {
 
@@ -23,6 +24,7 @@ public class WeekViewUtil {
     public static boolean isSameDay(Calendar dayOne, Calendar dayTwo) {
         return dayOne.get(Calendar.YEAR) == dayTwo.get(Calendar.YEAR) && dayOne.get(Calendar.DAY_OF_YEAR) == dayTwo.get(Calendar.DAY_OF_YEAR);
     }
+
 
     /**
      * Returns a calendar instance at the start of this day
